@@ -52,6 +52,17 @@ def main():
                         help='The phase to convert: test (default) or train')
     args = parser.parse_args()
     validate_arguments(args)
+
+    #class Arg(object):
+    #    def __init__(self):
+    #        pass
+
+    #args = Arg()
+    #args.def_path = '../googlenet40M_320_v0/model/deploy_v0_288.prototxt'
+    #args.caffemodel = '../googlenet40M_320_v0/model/dn_iter_12000_good.caffemodel'
+    #args.data_output_path = '../googlenet40M_320_v0/model/googlenet.npy'
+    #args.code_output_path = '../googlenet40M_320_v0/model/googlenet.py'
+    #args.phase = 'test'
     convert(args.def_path, args.caffemodel, args.data_output_path, args.code_output_path,
             args.phase)
 

@@ -101,6 +101,18 @@ class TensorFlowMapper(NodeMapper):
         return MaybeActivated(node)('conv', kernel_params.kernel_h, kernel_params.kernel_w, c_o,
                                     kernel_params.stride_h, kernel_params.stride_w, **kwargs)
 
+    def map_deconvolution(self, node):
+        (kernel_params, kwargs) = self.get_kernel_params(node)
+        h = kernel_params.kernel_h
+        w = kernel_params.kernel_w
+        c_o = node.output_shape[1]
+        c_i = node.parents[0].output_shape[1]
+        assert kernel_params.kernel_h == h
+        assert kernel_params.kernel_w == w
+        return MaybeActivated(node)('deconv', kernel_params.kernel_h, kernel_params.kernel_w, c_o,
+                                    kernel_params.stride_h, kernel_params.stride_w)
+
+
     def map_relu(self, node):
         return TensorFlowNode('relu')
 

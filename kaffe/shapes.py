@@ -74,6 +74,23 @@ def shape_convolution(node):
     return get_strided_kernel_output_shape(node, math.floor)
 
 
+def get_deconvolution_output_shape(node, round_func):
+    assert node.layer is not None
+    input_shape = node.get_only_parent().output_shape
+    kernel_params = node.layer.kernel_parameters
+    o_h = kernel_params.stride_h * (input_shape.height + 1) + kernel_params.kernel_h - 2 * kernel_params.pad_h
+    o_w = kernel_params.stride_w * (input_shape.width + 1) + kernel_params.kernel_w - 2 * kernel_params.pad_w
+    o_h = int(round_func(o_h))
+    o_w = int(round_func(o_w))
+
+    params = node.layer.parameters
+    has_c_o = hasattr(params, 'num_output')
+    c = params.num_output if has_c_o else input_shape.channels
+    return TensorShape(input_shape.batch_size, c, o_h, o_w)
+
+def shape_deconvolution(node):
+    return get_deconvolution_output_shape(node, math.floor)
+
 def shape_pool(node):
     return get_strided_kernel_output_shape(node, math.ceil)
 

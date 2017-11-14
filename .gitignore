@@ -9,4 +9,4 @@
 *.pyc
 tags
 cscope*
-
+.idea
