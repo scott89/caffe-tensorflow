@@ -53,16 +53,16 @@ def main():
     args = parser.parse_args()
     validate_arguments(args)
 
-    #class Arg(object):
+    # class Arg(object):
     #    def __init__(self):
     #        pass
-
-    #args = Arg()
-    #args.def_path = '../googlenet40M_320_v0/model/deploy_v0_288.prototxt'
-    #args.caffemodel = '../googlenet40M_320_v0/model/dn_iter_12000_good.caffemodel'
-    #args.data_output_path = '../googlenet40M_320_v0/model/googlenet.npy'
-    #args.code_output_path = '../googlenet40M_320_v0/model/googlenet.py'
-    #args.phase = 'test'
+    #
+    # args = Arg()
+    # args.def_path = '../deep_cut/googlenet40M_320_v0/deploy_v0_288.prototxt'
+    # args.caffemodel = '../deep_cut/googlenet40M_320_v0/dn_iter_12000_good.caffemodel'
+    # args.data_output_path = '../deep_cut/googlenet40M_320_v0/googlenet.npy'
+    # args.code_output_path = '../deep_cut/googlenet40M_320_v0/googlenet.py'
+    # args.phase = 'test'
     convert(args.def_path, args.caffemodel, args.data_output_path, args.code_output_path,
             args.phase)
 

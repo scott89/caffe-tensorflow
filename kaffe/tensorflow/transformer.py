@@ -9,7 +9,7 @@ from ..transformers import (DataInjector, DataReshaper, NodeRenamer, ReLUFuser,
 from . import network
 
 
-def get_padding_type(kernel_params, input_shape, output_shape):
+def get_padding_type(kernel_params, input_shape, output_shape, is_deconv=False):
     '''Translates Caffe's numeric padding to one of ('SAME', 'VALID').
     Caffe supports arbitrary padding values, while TensorFlow only
     supports 'SAME' and 'VALID' modes. So, not all Caffe paddings
@@ -17,15 +17,25 @@ def get_padding_type(kernel_params, input_shape, output_shape):
     how the padding edge-cases are handled. These are described here:
     https://github.com/Yangqing/caffe2/blob/master/caffe2/proto/caffe2_legacy.proto
     '''
-    k_h, k_w, s_h, s_w, p_h, p_w = kernel_params
-    s_o_h = np.ceil(input_shape.height / float(s_h))
-    s_o_w = np.ceil(input_shape.width / float(s_w))
+    k_h, k_w, s_h, s_w, p_h, p_w, dilation = kernel_params
+    if is_deconv:
+        s_o_h = np.ceil(input_shape.height * float(s_h))
+        s_o_w = np.ceil(input_shape.width * float(s_w))
+    else:
+        s_o_h = np.ceil(input_shape.height / float(s_h))
+        s_o_w = np.ceil(input_shape.width / float(s_w))
     if (output_shape.height == s_o_h) and (output_shape.width == s_o_w):
         return 'SAME'
-    v_o_h = np.ceil((input_shape.height - k_h + 1.0) / float(s_h))
-    v_o_w = np.ceil((input_shape.width - k_w + 1.0) / float(s_w))
+    if is_deconv:
+        v_o_h = s_h * (input_shape.height - 1) + ((k_h - 1) * dilation + 1)
+        v_o_w = s_w * (input_shape.width - 1) + ((k_w - 1) * dilation + 1)
+    else:
+        v_o_h = np.ceil((input_shape.height - ((k_h - 1) * dilation + 1) + 1.0) / float(s_h))
+        v_o_w = np.ceil((input_shape.width - ((k_h - 1) * dilation + 1) + 1.0) / float(s_w))
     if (output_shape.height == v_o_h) and (output_shape.width == v_o_w):
         return 'VALID'
+
+
     return None
 
 
@@ -77,10 +87,10 @@ class MaybeActivated(object):
 
 class TensorFlowMapper(NodeMapper):
 
-    def get_kernel_params(self, node):
+    def get_kernel_params(self, node, is_deconv=False):
         kernel_params = node.layer.kernel_parameters
         input_shape = node.get_only_parent().output_shape
-        padding = get_padding_type(kernel_params, input_shape, node.output_shape)
+        padding = get_padding_type(kernel_params, input_shape, node.output_shape, is_deconv)
         # Only emit the padding if it's not the default value.
         padding = {'padding': padding} if padding != network.DEFAULT_PADDING else {}
         return (kernel_params, padding)
@@ -99,10 +109,10 @@ class TensorFlowMapper(NodeMapper):
         assert kernel_params.kernel_h == h
         assert kernel_params.kernel_w == w
         return MaybeActivated(node)('conv', kernel_params.kernel_h, kernel_params.kernel_w, c_o,
-                                    kernel_params.stride_h, kernel_params.stride_w, **kwargs)
+                                    kernel_params.stride_h, kernel_params.stride_w, kernel_params.dilation, **kwargs)
 
     def map_deconvolution(self, node):
-        (kernel_params, kwargs) = self.get_kernel_params(node)
+        (kernel_params, kwargs) = self.get_kernel_params(node, is_deconv=True)
         h = kernel_params.kernel_h
         w = kernel_params.kernel_w
         c_o = node.output_shape[1]
@@ -275,6 +285,8 @@ class TensorFlowTransformer(object):
                 DataReshaper({
                     # (c_o, c_i, h, w) -> (h, w, c_i, c_o)
                     NodeKind.Convolution: (2, 3, 1, 0),
+
+                    NodeKind.Deconvolution: (2, 3, 1, 0),
 
                     # (c_o, c_i) -> (c_i, c_o)
                     NodeKind.InnerProduct: (1, 0)

@@ -7,8 +7,8 @@ TensorShape = namedtuple('TensorShape', ['batch_size', 'channels', 'height', 'wi
 
 
 def get_filter_output_shape(i_h, i_w, params, round_func):
-    o_h = (i_h + 2 * params.pad_h - params.kernel_h) / float(params.stride_h) + 1
-    o_w = (i_w + 2 * params.pad_w - params.kernel_w) / float(params.stride_w) + 1
+    o_h = (i_h + 2 * params.pad_h - ((params.kernel_h - 1) * params.dilation + 1)) / float(params.stride_h) + 1
+    o_w = (i_w + 2 * params.pad_w - ((params.kernel_w - 1) * params.dilation + 1)) / float(params.stride_w) + 1
     return (int(round_func(o_h)), int(round_func(o_w)))
 
 
@@ -78,8 +78,8 @@ def get_deconvolution_output_shape(node, round_func):
     assert node.layer is not None
     input_shape = node.get_only_parent().output_shape
     kernel_params = node.layer.kernel_parameters
-    o_h = kernel_params.stride_h * (input_shape.height + 1) + kernel_params.kernel_h - 2 * kernel_params.pad_h
-    o_w = kernel_params.stride_w * (input_shape.width + 1) + kernel_params.kernel_w - 2 * kernel_params.pad_w
+    o_h = kernel_params.stride_h * (input_shape.height - 1) + ((kernel_params.kernel_h - 1) * kernel_params.dilation + 1) - 2 * kernel_params.pad_h
+    o_w = kernel_params.stride_w * (input_shape.width - 1) + ((kernel_params.kernel_w - 1) * kernel_params.dilation + 1) - 2 * kernel_params.pad_w
     o_h = int(round_func(o_h))
     o_w = int(round_func(o_w))
 

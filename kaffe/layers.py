@@ -142,8 +142,11 @@ class LayerAdapter(object):
         s_w = self.get_kernel_value(params.stride_w, params.stride, 1, default=1)
         p_h = self.get_kernel_value(params.pad_h, params.pad, 0, default=0)
         p_w = self.get_kernel_value(params.pad_h, params.pad, 1, default=0)
-        return KernelParameters(k_h, k_w, s_h, s_w, p_h, p_w)
+        dilation = 1
+        if hasattr(params, 'dilation') and params.dilation:
+            dilation = int(params.dilation[0])
+        return KernelParameters(k_h, k_w, s_h, s_w, p_h, p_w, dilation)
 
 
 KernelParameters = namedtuple('KernelParameters', ['kernel_h', 'kernel_w', 'stride_h', 'stride_w',
-                                                   'pad_h', 'pad_w'])
+                                                   'pad_h', 'pad_w', 'dilation'])
