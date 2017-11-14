@@ -107,10 +107,12 @@ class TensorFlowMapper(NodeMapper):
         w = kernel_params.kernel_w
         c_o = node.output_shape[1]
         c_i = node.parents[0].output_shape[1]
+        if not node.parameters.bias_term:
+            kwargs['biased'] = False
         assert kernel_params.kernel_h == h
         assert kernel_params.kernel_w == w
         return MaybeActivated(node)('deconv', kernel_params.kernel_h, kernel_params.kernel_w, c_o,
-                                    kernel_params.stride_h, kernel_params.stride_w)
+                                    kernel_params.stride_h, kernel_params.stride_w, **kwargs)
 
 
     def map_relu(self, node):
