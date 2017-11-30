@@ -98,3 +98,7 @@ def shape_pool(node):
 def shape_inner_product(node):
     input_shape = node.get_only_parent().output_shape
     return TensorShape(input_shape.batch_size, node.layer.parameters.num_output, 1, 1)
+
+def shape_interp(node):
+    input_shape = node.get_only_parent().output_shape
+    return TensorShape(input_shape.batch_size, input_shape.channels, node.layer.parameters.height, node.layer.parameters.width)

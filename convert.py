@@ -41,28 +41,28 @@ def convert(def_path, caffemodel_path, data_output_path, code_output_path, phase
 
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('def_path', help='Model definition (.prototxt) path')
-    parser.add_argument('--caffemodel', help='Model data (.caffemodel) path')
-    parser.add_argument('--data-output-path', help='Converted data output path')
-    parser.add_argument('--code-output-path', help='Save generated source to this path')
-    parser.add_argument('-p',
-                        '--phase',
-                        default='test',
-                        help='The phase to convert: test (default) or train')
-    args = parser.parse_args()
-    validate_arguments(args)
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument('def_path', help='Model definition (.prototxt) path')
+    # parser.add_argument('--caffemodel', help='Model data (.caffemodel) path')
+    # parser.add_argument('--data-output-path', help='Converted data output path')
+    # parser.add_argument('--code-output-path', help='Save generated source to this path')
+    # parser.add_argument('-p',
+    #                     '--phase',
+    #                     default='test',
+    #                     help='The phase to convert: test (default) or train')
+    # args = parser.parse_args()
+    # validate_arguments(args)
 
-    # class Arg(object):
-    #    def __init__(self):
-    #        pass
-    #
-    # args = Arg()
-    # args.def_path = '../deep_cut/googlenet40M_320_v0/deploy_v0_288.prototxt'
-    # args.caffemodel = '../deep_cut/googlenet40M_320_v0/dn_iter_12000_good.caffemodel'
-    # args.data_output_path = '../deep_cut/googlenet40M_320_v0/googlenet.npy'
-    # args.code_output_path = '../deep_cut/googlenet40M_320_v0/googlenet.py'
-    # args.phase = 'test'
+    class Arg(object):
+       def __init__(self):
+           pass
+
+    args = Arg()
+    args.def_path = '../resnet_sal/model/res50-sorm-baseline/test.prototxt'
+    args.caffemodel = '../resnet_sal/model/res50-sorm-baseline/sorm_iter_40000.caffemodel'
+    args.data_output_path = '../resnet_sal/model/tfmodel/resnet50_tfmodel.npy-ignore'
+    args.code_output_path = '../resnet_sal/model/tfmodel/resnet50_tfmodel.py-ignore'
+    args.phase = 'test'
     convert(args.def_path, args.caffemodel, args.data_output_path, args.code_output_path,
             args.phase)
 

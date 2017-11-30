@@ -181,6 +181,11 @@ class TensorFlowMapper(NodeMapper):
             return TensorFlowNode(operations[op_code])
         except KeyError:
             raise KaffeError('Unknown elementwise operation: {}'.format(op_code))
+    def map_interp(self, node):
+        return TensorFlowNode('interp', node.parameters.height, node.parameters.width)
+
+    def map_sigmoid(self, node):
+        return TensorFlowNode('sigmoid')
 
     def commit(self, chains):
         return chains
